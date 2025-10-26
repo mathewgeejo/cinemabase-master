@@ -28,7 +28,11 @@ router.post("/signUp", async (req, res) => {
     const user = new User({ 
       email, 
       password,
-      role: role || "user" // Default to user if no role is provided
+      role: role || "user", // Default to user if no role is provided
+      profile: {
+        name: email.split('@')[0], // Use email prefix as default name
+        joinedDate: new Date()
+      }
     });
     
     // Legacy admin check (can be removed if role selection is always provided)
@@ -48,7 +52,9 @@ router.post("/signUp", async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
+        profile: user.profile,
       },
+      message: "Registration successful! Welcome to iCinema!",
     });
 
     sendEmail(email, "Welcome to iCinema", "Welcome to iCinema");
@@ -95,7 +101,9 @@ router.post("/signIn", async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
+        profile: user.profile,
       },
+      message: "Login successful! Welcome back!",
     });
   } catch (error) {
     console.log(error);

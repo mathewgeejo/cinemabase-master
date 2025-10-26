@@ -18,6 +18,10 @@ class Login extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.loggedIn && !prevProps.loggedIn) {
+      // Show success toast
+      if (window.showToast) {
+        window.showToast('Successfully logged in! Welcome back.', 'success');
+      }
       this.props.history.push("/");
     }
   }

@@ -18,6 +18,10 @@ class RegisterForm extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.loggedIn && !prevProps.loggedIn) {
+      // Show success toast
+      if (window.showToast) {
+        window.showToast('Registration successful! Welcome to CinemaBase.', 'success');
+      }
       this.props.history.push("/");
     }
   }

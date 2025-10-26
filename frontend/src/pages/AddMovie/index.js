@@ -32,6 +32,7 @@ class AddMovieForm extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.genres.length > 0 && prevProps.genres.length === 0) {
+      console.log("Setting first genre:", this.props.genres[0]);
       this.setState((prevState) => ({
         data: {
           ...prevState.data,
@@ -50,14 +51,27 @@ class AddMovieForm extends React.Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     const { data } = this.state;
+    
+    console.log("=== ADD MOVIE FORM SUBMIT ===");
+    console.log("Form data:", data);
+    console.log("User from localStorage:", localStorage.getItem("user"));
+    console.log("Genres available:", this.props.genres);
+    
     const { error } = movieSchema.validate(data);
     this.setState({ errors: error ? error.details : {} });
+    
     if (error) {
       console.log("Validation error:", error.details);
+      alert("Form validation failed: " + error.details.map(d => d.message).join(", "));
       return;
     }
+    
+    console.log("Validation passed, calling addMovie action...");
+    
     try {
       await this.props.addMovie(data, this.props.history);
+      console.log("addMovie action completed successfully");
+      
       if (this._isMounted) {
         this.setState({
           data: {
@@ -74,6 +88,7 @@ class AddMovieForm extends React.Component {
       }
     } catch (err) {
       console.error("Error adding movie:", err);
+      alert("Error adding movie: " + (err.message || "Unknown error"));
     }
   };
 

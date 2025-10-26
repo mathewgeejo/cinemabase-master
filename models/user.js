@@ -8,6 +8,12 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     password: { type: String, required: true, minLength: 6 },
+    profile: {
+      name: { type: String, default: "" },
+      bio: { type: String, default: "" },
+      avatar: { type: String, default: "" },
+      joinedDate: { type: Date, default: Date.now },
+    },
     favouriteMovies: [{ type: String }],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],

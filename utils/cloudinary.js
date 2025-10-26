@@ -11,18 +11,65 @@ console.log("API Key:", process.env.CLOUDINARY_API_KEY ? "Loaded" : "Missing");
 console.log("API Secret:", process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Missing");
 console.log("-----------------------------");
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Check if Cloudinary is properly configured
+const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                               process.env.CLOUDINARY_API_KEY && 
+                               process.env.CLOUDINARY_API_SECRET;
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder: "Movies",
-    allowedFormats: ["jpeg", "png", "jpg"],
-  },
-});
+let upload;
 
-export const upload = multer({ storage });
+if (isCloudinaryConfigured) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinary.v2,
+    params: {
+      folder: "Movies",
+      allowedFormats: ["jpeg", "png", "jpg"],
+      transformation: [
+        { width: 300, height: 450, crop: "limit" }
+      ]
+    },
+  });
+
+  upload = multer({ 
+    storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Accept image files only
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed!'), false);
+      }
+    }
+  });
+} else {
+  console.log("Cloudinary not configured, using memory storage");
+  
+  // Use memory storage as fallback
+  const storage = multer.memoryStorage();
+  
+  upload = multer({ 
+    storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Accept image files only
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed!'), false);
+      }
+    }
+  });
+}
+
+export { upload };

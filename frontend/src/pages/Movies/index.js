@@ -5,6 +5,7 @@ import _ from "lodash";
 import { search, categorize, filterRating } from "../../utils";
 import { MoviesTable, Pagination } from "../../components";
 import { Input, Loading, ListGroup, Rating } from "../../components/common";
+import AdminMovieManagement from "../../components/AdminMovieManagement";
 
 import { getMovies } from "../../actions/moviesAction";
 import { getGenres } from "../../actions/genreAction";
@@ -58,6 +59,11 @@ const Movies = (props) => {
   return (
     <div className="background-container">
       <div className="mx-5 py-5">
+        {/* Admin Movie Management Section */}
+        {props.loggedIn && props.user && props.user.role === "admin" && (
+          <AdminMovieManagement />
+        )}
+        
         <div className="row">
           <div className="col-lg-2 col-sm-12 mt-10">
             <h4 className="text-muted text-left p-1">Filters</h4>

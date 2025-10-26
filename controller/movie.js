@@ -65,15 +65,42 @@ router.get("/:movieId", async (req, res) => {
  */
 router.post(
   "/addMovie",
-  upload.single("image"),
+  (req, res, next) => {
+    // Custom middleware to handle upload errors gracefully
+    upload.single("image")(req, res, (err) => {
+      if (err) {
+        console.log("Upload error (using placeholder):", err.message);
+        // Continue without file if upload fails
+        req.uploadError = err;
+      }
+      next();
+    });
+  },
   checkAuth,
   checkAdmin,
   async (req, res) => {
-    console.log("Received request to add movie:", req.body);
+    console.log("=== ADD MOVIE REQUEST ===");
+    console.log("Headers:", req.headers);
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
+    console.log("Upload Error:", req.uploadError);
+    console.log("User:", req.user);
+    console.log("========================");
+    
     try {
       const { title, genre, rate, description, trailerLink, movieLength } =
       req.body;
     console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    
+    // Validate required fields
+    if (!title || !genre || !description || !movieLength) {
+      return res.status(400).json({ 
+        error: "Missing required fields", 
+        details: "Title, genre, description, and movie length are required" 
+      });
+    }
+    
     const isMovieExists = await Movie.findOne({ title });
 
     if (isMovieExists) {
@@ -81,14 +108,28 @@ router.post(
       return res.status(400).json({ message: "Movie already exists" });
     }
 
+    // Handle image upload - use uploaded path, memory buffer info, or default placeholder
+    let imagePath = "https://via.placeholder.com/300x450?text=No+Image";
+    
+    if (req.file) {
+      if (req.file.path) {
+        // Cloudinary upload successful
+        imagePath = req.file.path;
+      } else if (req.file.buffer) {
+        // Memory storage (no Cloudinary) - use placeholder for now
+        // In a real app, you'd save this to local storage or another service
+        imagePath = "https://via.placeholder.com/300x450?text=Uploaded+Image";
+      }
+    }
+
     const newMovie = new Movie({
       title,
-      genre: genre,
-      rate,
+      genre: [genre], // Convert single genre to array as expected by model
+      rate: Number(rate), // Ensure rate is a number
       description,
       trailerLink,
       movieLength,
-      image: req.file.path,
+      image: imagePath,
     });
     await newMovie.save();
     console.log("Movie saved successfully:", newMovie);
@@ -99,9 +140,29 @@ router.post(
     res.status(201).json({ message: "Movie added successfully", movies: movies });
   } catch (error) {
     console.error("Error adding movie to database:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to add movie", message: error.message });
+    
+    // Provide more detailed error information
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        error: "Validation failed", 
+        details: validationErrors,
+        message: error.message 
+      });
+    }
+    
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        error: "Duplicate entry", 
+        message: "A movie with this title already exists" 
+      });
+    }
+    
+    res.status(500).json({ 
+      error: "Failed to add movie", 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

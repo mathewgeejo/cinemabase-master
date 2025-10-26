@@ -26,7 +26,7 @@ export default function (state = initState, action) {
     case LOGIN_ERROR:
       return {
         ...state,
-        authMessage: action.error.response.data.error,
+        authMessage: action.error?.response?.data?.error || action.error?.message || "Login failed",
       };
     case SIGNUP_SUCCESS:
       return {
@@ -39,7 +39,7 @@ export default function (state = initState, action) {
     case SIGNUP_ERROR:
       return {
         ...state,
-        authMessage: action.error.response.data.error,
+        authMessage: action.error?.response?.data?.error || action.error?.message || "Registration failed",
       };
 
     case SIGNOUT:
@@ -49,6 +49,19 @@ export default function (state = initState, action) {
         loggedIn: false,
         authMessage: null,
       };
+    
+    case "SET_AUTH_MESSAGE":
+      return {
+        ...state,
+        authMessage: action.payload,
+      };
+    
+    case "CLEAR_AUTH_MESSAGE":
+      return {
+        ...state,
+        authMessage: null,
+      };
+      
     default:
       return state;
   }

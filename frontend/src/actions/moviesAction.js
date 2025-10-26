@@ -28,12 +28,23 @@ export const addMovie = (movie, history) => {
     formData.append("genre", movie.genre);
     formData.append("rate", movie.rate);
     formData.append("description", movie.description);
-    formData.append("image", movie.image);
-    formData.append("trailerLink", movie.trailerLink);
+    
+    // Only append image if it's actually a file
+    if (movie.image && movie.image instanceof File) {
+      formData.append("image", movie.image);
+    }
+    
+    formData.append("trailerLink", movie.trailerLink || "");
     formData.append("movieLength", movie.movieLength);
 
     try {
-      console.log("Sending POST request to /api/movies/addMovie with data:", formData);
+      console.log("Sending POST request to /api/movies/addMovie");
+      console.log("Token:", token);
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, ":", value);
+      }
+      
       const result = await Axios.post(
         "/api/movies/addMovie",
         formData,
@@ -42,6 +53,8 @@ export const addMovie = (movie, history) => {
       console.log("Received response from server:", result);
       dispatch({ type: GET_MOVIES_SUCCESS, payload: result.data.movies });
       history.push("/movies");
+      
+      // Refresh the movies list
       const updatedMovies = await Axios.get("/api/movies");
       dispatch({
         type: GET_MOVIES_SUCCESS,
@@ -49,7 +62,15 @@ export const addMovie = (movie, history) => {
       });
     } catch (error) {
       console.error("Error sending request:", error);
+      console.error("Error response:", error.response);
+      if (error.response) {
+        console.error("Error data:", error.response.data);
+        console.error("Error status:", error.response.status);
+      }
       dispatch({ type: GET_MOVIES_ERROR, error });
+      
+      // Show user-friendly error message
+      alert("Failed to add movie: " + (error.response?.data?.message || error.message));
     }
   };
 };

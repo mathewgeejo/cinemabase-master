@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Add Movie</title>
+</head>
+<body>
+    <h1>Test Add Movie API</h1>
+    <button onclick="testAddMovie()">Test Add Movie</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAddMovie() {
+            try {
+                // First login to get token
+                const loginResponse = await fetch('/api/auth/signin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const loginData = await loginResponse.json();
+                console.log('Login response:', loginData);
+                
+                if (!loginData.accessToken) {
+                    document.getElementById('result').innerHTML = 'Login failed: ' + JSON.stringify(loginData);
+                    return;
+                }
+                
+                // Now test adding movie
+                const formData = new FormData();
+                formData.append('title', 'Test Movie ' + Date.now());
+                formData.append('genre', '68fe1b999d185c3a74453b4c'); // Use existing genre ID
+                formData.append('rate', '8.5');
+                formData.append('description', 'Test movie description');
+                formData.append('trailerLink', 'https://example.com/trailer');
+                formData.append('movieLength', '120');
+                
+                const movieResponse = await fetch('/api/movies/addMovie', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${loginData.accessToken}`
+                    },
+                    body: formData
+                });
+                
+                const movieData = await movieResponse.json();
+                console.log('Add movie response:', movieData);
+                
+                document.getElementById('result').innerHTML = 
+                    '<h3>Result:</h3><pre>' + JSON.stringify(movieData, null, 2) + '</pre>';
+                    
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

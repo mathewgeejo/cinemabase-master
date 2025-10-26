@@ -50,19 +50,11 @@ function Navbar(props) {
               </Link>
             </>
           ) : (
-            <Link
-              onClick={() => {
-                toggleNav();
-                props.signOut();
-              }}
-              to="/#"
-            >
-              Log out
-            </Link>
-          )}
-          {props.loggedIn && props.user && (
             <>
-              {props.user.role === "admin" && (
+              <Link onClick={toggleNav} to="/profile">
+                My Profile
+              </Link>
+              {props.user && props.user.role === "admin" && (
                 <>
                   <Link onClick={toggleNav} to="/movies/new">
                     Add Movie
@@ -72,13 +64,22 @@ function Navbar(props) {
                   </Link>
                 </>
               )}
-              {props.user.role === "user" && (
+              {props.user && props.user.role === "user" && (
                 <>
                   <Link onClick={toggleNav} to="/dashboard">
                     My Dashboard
                   </Link>
                 </>
               )}
+              <Link
+                onClick={() => {
+                  toggleNav();
+                  props.signOut();
+                }}
+                to="/#"
+              >
+                Log out
+              </Link>
             </>
           )}
         </ul>

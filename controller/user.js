@@ -5,6 +5,69 @@ import express from "express";
 const router = express.Router();
 
 /**
+ * Get user's profile
+ * @route GET /api/users/me/profile
+ * @returns {object} User's profile information
+ */
+router.get("/me/profile", checkAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        profile: user.profile,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Update user's profile
+ * @route PUT /api/users/me/profile
+ * @returns {object} Updated user profile
+ */
+router.put("/me/profile", checkAuth, async (req, res) => {
+  try {
+    const { name, bio, avatar } = req.body;
+    
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update profile fields
+    if (name !== undefined) user.profile.name = name;
+    if (bio !== undefined) user.profile.bio = bio;
+    if (avatar !== undefined) user.profile.avatar = avatar;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        profile: user.profile,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * Get user's lists (wishlist, bookmarks, ongoing, completed)
  * @route GET /api/users/me/lists
  * @returns {object} User's movie lists
