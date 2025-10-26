@@ -3,6 +3,7 @@ export default function (items, filter, filterBy) {
   if (
     !filter ||
     !filterBy ||
+    items.length === 0 ||
     !items[0].hasOwnProperty(filterBy) ||
     !filter.trim()
   )

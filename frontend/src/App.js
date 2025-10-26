@@ -9,8 +9,8 @@ import {
 import Movies from "./pages/Movies";
 import AddMovieForm from "./pages/AddMovie";
 import AddGenre from "./pages/AddGenre";
+import UserDashboard from "./pages/UserDashboard";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 // import MovieForm from './components/movieForm';
@@ -31,12 +31,12 @@ class App extends Component {
               <Route exact path="/movies/new" component={AddMovieForm} />
               <Route exact path="/genres/new" component={AddGenre} />
               <Route exact path="/login" component={Login} />
+              <Route exact path="/dashboard" component={UserDashboard} />
               <Route path="/register" component={Register} />
               <Route path="/movies" exact component={Movies} />
 
               <Redirect exact from="/" to="/movies" />
             </Switch>
-            <Footer />
           </div>
         </Router>
       </Provider>

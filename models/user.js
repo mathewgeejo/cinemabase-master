@@ -9,6 +9,10 @@ const userSchema = mongoose.Schema(
     },
     password: { type: String, required: true, minLength: 6 },
     favouriteMovies: [{ type: String }],
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
+    bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
+    ongoingMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
+    completedMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Movie" }],
     role: {
       type: String,
       enum: ["user", "admin"],

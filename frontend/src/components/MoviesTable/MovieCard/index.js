@@ -2,9 +2,10 @@ import React from "react";
 
 import FlippingCardFront from "./CardFront";
 import FlippingCardBack from "./CardBack";
+import UserActionButtons from "../../UserActionButtons";
 import "./style.css";
 
-export default function ({ movie }) {
+export default function ({ movie, showUserActions, onListUpdate }) {
   const {
     _id,
     title,
@@ -25,17 +26,26 @@ export default function ({ movie }) {
 
   return (
     <div className="card-container">
-      <div className="card-wrapper" id={_id} onClick={() => flipCard(_id)}>
-        <FlippingCardFront
-          trailerLink={trailerLink}
-          coverImage={coverImage}
-          rate={rate}
-          movieLength={movieLength}
-          genre={genre}
-          title={title}
-        />
+      <div className="card-wrapper" id={_id}>
+        <div onClick={() => flipCard(_id)}>
+          <FlippingCardFront
+            trailerLink={trailerLink}
+            coverImage={coverImage}
+            rate={rate}
+            movieLength={movieLength}
+            genre={genre}
+            title={title}
+          />
 
-        <FlippingCardBack description={description} />
+          <FlippingCardBack description={description} />
+        </div>
+        
+        {showUserActions && (
+          <UserActionButtons 
+            movie={movie} 
+            onListUpdate={onListUpdate}
+          />
+        )}
       </div>
     </div>
   );

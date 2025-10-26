@@ -37,9 +37,10 @@ const Movies = (props) => {
   };
 
   const { movies, genres, loading } = props;
-  const allGenres = [{ name: "All" }, ...genres];
+  const allGenres = [{ name: "All" }, ...(genres || [])];
 
   const filteredMovies = useMemo(() => {
+    if (!movies || !Array.isArray(movies)) return [];
     let result = search(movies, searchFilter, "title");
     result = categorize(result, currentGenre);
     result = filterRating(result, Number(rating));
@@ -92,6 +93,7 @@ const Movies = (props) => {
                 pageSize={pageSize}
                 currentPage={currentPage}
                 movies={filteredMovies}
+                showUserActions={props.loggedIn && props.user && props.user.role === "user"}
               />
             ) : (
               <h1 className="text-white">No Movies</h1>
@@ -116,6 +118,7 @@ const mapStateToProps = (state) => {
     movies: state.movie.movies,
     genres: state.genre.genres,
     loggedIn: state.auth.loggedIn,
+    user: state.auth.user,
     loading: state.movie.loading,
   };
 };

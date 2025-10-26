@@ -15,7 +15,7 @@ const router = express.Router();
  * @throws {Error} If the email already exists or an error occurs while saving the user.
  */
 router.post("/signUp", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   try {
     const isUserExists = await User.findOne({ email });
 
@@ -25,10 +25,17 @@ router.post("/signUp", async (req, res) => {
         .json({ error: "The entered Email already exists!" });
     }
 
-    const user = new User({ email, password });
+    const user = new User({ 
+      email, 
+      password,
+      role: role || "user" // Default to user if no role is provided
+    });
+    
+    // Legacy admin check (can be removed if role selection is always provided)
     if (email === "admin@gmail.com") {
       user.role = "admin";
     }
+    
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

@@ -10,6 +10,7 @@ class RegisterForm extends React.Component {
       email: "",
       password: "",
       passwordRepeat: "",
+      role: "user",
     },
     errors: {},
     passwordError: "",
@@ -57,10 +58,10 @@ class RegisterForm extends React.Component {
   };
   handleSubmit = (e) => {
     e.preventDefault();
-    const { password, passwordRepeat, email } = this.state.data;
+    const { password, passwordRepeat, email, role } = this.state.data;
     if (password !== passwordRepeat)
       this.setState({ passwordError: "The passwords doesn not match." });
-    else this.props.signUp({ email, password }, this.props.history);
+    else this.props.signUp({ email, password, role }, this.props.history);
   };
 
   schema = {
@@ -70,11 +71,12 @@ class RegisterForm extends React.Component {
       .label("Email"),
     password: Joi.string().min(8).required().label("Password"),
     passwordRepeat: Joi.string().required().label("Repear Password"),
+    role: Joi.string().valid("user", "admin").required().label("Role"),
   };
   render() {
     const { authMessage } = this.props;
     const { errors, passwordError } = this.state;
-    const { email, password, passwordRepeat } = this.state.data;
+    const { email, password, passwordRepeat, role } = this.state.data;
 
     return (
       <div className="background-container pt-5">
@@ -112,6 +114,20 @@ class RegisterForm extends React.Component {
               placeholder="Repeat your password..."
               value={passwordRepeat}
             />
+            <div className="input-container">
+              <label htmlFor="role">Role</label>
+              <div className="input-icon fas fa-user" />
+              <select 
+                name="role" 
+                value={role} 
+                onChange={this.handleChange} 
+                className="form-control"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              {errors["role"] && <div className="alert alert-danger">{errors["role"]}</div>}
+            </div>
             {authMessage || passwordError ? (
               <p className="bg-info text-white">
                 {" "}
