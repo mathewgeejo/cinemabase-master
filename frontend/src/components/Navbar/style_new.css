@@ -1,0 +1,130 @@
+/* Minimal Monochrome Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #000000;
+  border-bottom: 1px solid #333333;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+}
+
+/* Brand/Logo */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.navbar-brand:hover {
+  color: #ff0000;
+}
+
+.navbar-logo {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.navbar-title {
+  letter-spacing: 0.05em;
+}
+
+/* Navigation */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #cccccc;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  background-color: #1a1a1a;
+}
+
+.nav-link:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Special nav link styles */
+.nav-cta {
+  background-color: #ffffff;
+  color: #000000 !important;
+  padding: 0.5rem 1rem;
+}
+
+.nav-cta:hover {
+  background-color: #cccccc !important;
+  color: #000000 !important;
+}
+
+.nav-logout {
+  color: #ff0000;
+}
+
+.nav-logout:hover {
+  color: #ff0000;
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 var(--space-sm);
+  }
+  
+  .navbar-nav {
+    gap: var(--space-sm);
+  }
+  
+  .nav-link {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs);
+  }
+  
+  .navbar-title {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-nav .nav-link:not(.nav-cta):not(.nav-logout) {
+    display: none;
+  }
+  
+  .navbar-title {
+    display: none;
+  }
+}

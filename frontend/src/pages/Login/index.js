@@ -1,11 +1,10 @@
 import React from "react";
 import Joi from "joi";
 import _ from "lodash";
-import Input from "../../components/common/Input";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import { signIn } from "../../actions/authAction";
-import Button from "../../components/common/Button";
-import "./style.css";
+import "./style_new.css";
 
 class Login extends React.Component {
   state = {
@@ -14,6 +13,7 @@ class Login extends React.Component {
       password: "",
     },
     errors: {},
+    isLoading: false,
   };
 
   componentDidUpdate(prevProps) {
@@ -68,61 +68,113 @@ class Login extends React.Component {
     );
     return errors;
   };
+
   handleSubmit = (e) => {
     e.preventDefault();
     const errors = this.validate();
-    if (_.isEmpty(errors))
+    if (_.isEmpty(errors)) {
+      this.setState({ isLoading: true });
       this.props.signIn(this.state.data, this.props.history);
+    }
   };
 
   render() {
-    const { data, errors } = this.state;
+    const { data, errors, isLoading } = this.state;
     const { email, password } = data;
     const { authMessage } = this.props;
+    const isDisabled = !!this.validate() || isLoading;
+
     return (
-      <div className="background-container pt-5">
-        <div className="container">
-          <h1 className="header">Login</h1>
-          <form onSubmit={this.handleSubmit}>
-            <Input
-              name="email"
-              label="Email"
-              type="email"
-              error={errors["email"]}
-              iconClass="fas fa-envelope"
-              onChange={this.handleChange}
-              placeholder="Please enter your email..."
-              value={email}
-              autoFocus
-            />
-            <Input
-              name="password"
-              type="password"
-              label="Password"
-              error={errors["password"]}
-              iconClass="fas fa-key"
-              onChange={this.handleChange}
-              placeholder="Please enter your password..."
-              value={password}
-            />
-            {authMessage && <p className="text-white">{authMessage}</p>}
-            <Button disabled={this.validate()} type="submit" label="Login" />
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <h1 className="auth-title">Welcome Back</h1>
+            <p className="auth-subtitle">Sign in to your account</p>
+          </div>
+
+          <form onSubmit={this.handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                className={`form-input ${errors.email ? 'error' : ''}`}
+                placeholder="Enter your email"
+                value={email}
+                onChange={this.handleChange}
+                autoFocus
+                autoComplete="email"
+              />
+              {errors.email && (
+                <span className="form-error">{errors.email}</span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                className={`form-input ${errors.password ? 'error' : ''}`}
+                placeholder="Enter your password"
+                value={password}
+                onChange={this.handleChange}
+                autoComplete="current-password"
+              />
+              {errors.password && (
+                <span className="form-error">{errors.password}</span>
+              )}
+            </div>
+
+            {authMessage && (
+              <div className="auth-message error">
+                {authMessage}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className={`btn btn-primary btn-lg ${isDisabled ? 'disabled' : ''}`}
+              disabled={isDisabled}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+
+            <div className="auth-footer">
+              <p className="auth-link-text">
+                Don't have an account?{' '}
+                <Link to="/register" className="auth-link">
+                  Sign up
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
     );
   }
 }
-const mapStateToProps = (state) => {
-  return {
-    loggedIn: state.auth.loggedIn,
-    authMessage: state.auth.authMessage,
-  };
-};
-const mapDispatchToProps = (dispatch) => {
-  return {
-    signIn: (creds, history) => dispatch(signIn(creds, history)),
-  };
-};
+
+const mapStateToProps = (state) => ({
+  loggedIn: state.auth.loggedIn,
+  authMessage: state.auth.authMessage,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  signIn: (creds, history) => dispatch(signIn(creds, history)),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

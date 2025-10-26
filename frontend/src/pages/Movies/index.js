@@ -9,6 +9,7 @@ import AdminMovieManagement from "../../components/AdminMovieManagement";
 
 import { getMovies } from "../../actions/moviesAction";
 import { getGenres } from "../../actions/genreAction";
+import "./style.css";
 
 const Movies = (props) => {
   const [pageSize] = useState(12);
@@ -16,6 +17,7 @@ const Movies = (props) => {
   const [currentGenre, setCurrentGenre] = useState("All");
   const [searchFilter, setSearchFilter] = useState("");
   const [rating, setRating] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     props.getMovies();
@@ -37,6 +39,13 @@ const Movies = (props) => {
     setCurrentPage(page);
   };
 
+  const clearFilters = () => {
+    setCurrentGenre("All");
+    setSearchFilter("");
+    setRating(0);
+    setCurrentPage(1);
+  };
+
   const { movies, genres, loading } = props;
   const allGenres = [{ name: "All" }, ...(genres || [])];
 
@@ -48,92 +57,174 @@ const Movies = (props) => {
     return result;
   }, [movies, searchFilter, currentGenre, rating]);
 
+  const hasActiveFilters = currentGenre !== "All" || searchFilter || rating > 0;
+
   if (loading) {
     return (
-      <div className="background-container pt-5">
-        <Loading />
+      <div className="movies-page">
+        <div className="container">
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Loading movies...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="background-container">
-      <div className="mx-5 py-5">
-        {/* Admin Movie Management Section */}
-        {props.loggedIn && props.user && props.user.role === "admin" && (
-          <AdminMovieManagement />
-        )}
-        
-        <div className="row">
-          <div className="col-lg-2 col-sm-12 mt-10">
-            <h4 className="text-muted text-left p-1">Filters</h4>
-            <ListGroup
-              active={currentGenre}
-              onChange={(val) => handleChange("currentGenre", val)}
-              options={allGenres}
-            />
-            <h4 className="text-muted text-left p-1 mt-3">Rating</h4>
-            <Rating
-              total={10}
-              filled={rating}
-              onChange={(val) => handleChange("rating", val)}
-            />
+    <div className="movies-page">
+      <div className="container">
+        {/* Page Header */}
+        <div className="page-header">
+          <div className="header-content">
+            <h1 className="page-title">Movie Collection</h1>
+            <p className="page-subtitle">
+              Discover and explore our extensive movie library
+            </p>
+          </div>
+          
+          {/* Admin Movie Management */}
+          {props.loggedIn && props.user && props.user.role === "admin" && (
+            <AdminMovieManagement />
+          )}
+        </div>
+
+        {/* Search and Filters */}
+        <div className="search-section">
+          <div className="search-bar">
+            <div className="search-input-container">
+              <input
+                type="text"
+                placeholder="Search movies..."
+                className="search-input"
+                value={searchFilter}
+                onChange={(event) => handleChange("searchFilter", event.target.value)}
+              />
+              <span className="search-icon">🔍</span>
+            </div>
+            
+            <button 
+              className="filter-toggle btn btn-ghost"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              Filters {showFilters ? '−' : '+'}
+            </button>
           </div>
 
-          <div className="col-lg-10 col-sm-12">
-            <Input
-              onChange={(event) =>
-                handleChange("searchFilter", event.target.value)
-              }
-              label="Search Movie"
-              iconClass="fas fa-search"
-              placeholder="Search..."
-            />
-            <p className="text-left text-muted">
-              {!!filteredMovies.length ? `${filteredMovies.length}` : "0"}
-              movies found.
-            </p>
-
-            {!!filteredMovies ? (
-              <MoviesTable
-                pageSize={pageSize}
-                currentPage={currentPage}
-                movies={filteredMovies}
-                showUserActions={props.loggedIn && props.user && props.user.role === "user"}
-              />
-            ) : (
-              <h1 className="text-white">No Movies</h1>
+          {/* Filters Panel */}
+          <div className={`filters-panel ${showFilters ? 'open' : ''}`}>
+            <div className="filters-grid">
+              <div className="filter-group">
+                <h4 className="filter-title">Genre</h4>
+                <ListGroup
+                  active={currentGenre}
+                  onChange={(val) => handleChange("currentGenre", val)}
+                  options={allGenres}
+                />
+              </div>
+              
+              <div className="filter-group">
+                <h4 className="filter-title">Minimum Rating</h4>
+                <Rating
+                  total={10}
+                  filled={rating}
+                  onChange={(val) => handleChange("rating", val)}
+                />
+              </div>
+            </div>
+            
+            {hasActiveFilters && (
+              <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+                Clear All Filters
+              </button>
             )}
-            <br />
+          </div>
+        </div>
 
+        {/* Results Summary */}
+        <div className="results-summary">
+          <p className="results-count">
+            {filteredMovies.length} movie{filteredMovies.length !== 1 ? 's' : ''} found
+            {hasActiveFilters && ' with current filters'}
+          </p>
+          
+          {hasActiveFilters && (
+            <div className="active-filters">
+              {currentGenre !== "All" && (
+                <span className="filter-tag">
+                  Genre: {currentGenre}
+                  <button onClick={() => handleChange("currentGenre", "All")}>×</button>
+                </span>
+              )}
+              {rating > 0 && (
+                <span className="filter-tag">
+                  Rating: {rating}+ ★
+                  <button onClick={() => handleChange("rating", 0)}>×</button>
+                </span>
+              )}
+              {searchFilter && (
+                <span className="filter-tag">
+                  Search: "{searchFilter}"
+                  <button onClick={() => handleChange("searchFilter", "")}>×</button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Movies Grid */}
+        {filteredMovies.length > 0 ? (
+          <>
+            <MoviesTable
+              pageSize={pageSize}
+              currentPage={currentPage}
+              movies={filteredMovies}
+              showUserActions={props.loggedIn && props.user && props.user.role === "user"}
+            />
+            
             <Pagination
               itemsCount={filteredMovies.length}
               pageSize={pageSize}
               onPageChange={onPageChange}
               currentPage={currentPage}
             />
+          </>
+        ) : (
+          <div className="no-results">
+            <div className="no-results-content">
+              <span className="no-results-icon">🎬</span>
+              <h3>No movies found</h3>
+              <p>
+                {hasActiveFilters 
+                  ? "Try adjusting your filters to see more movies."
+                  : "No movies are available at the moment."
+                }
+              </p>
+              {hasActiveFilters && (
+                <button className="btn btn-primary" onClick={clearFilters}>
+                  Clear Filters
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    movies: state.movie.movies,
-    genres: state.genre.genres,
-    loggedIn: state.auth.loggedIn,
-    user: state.auth.user,
-    loading: state.movie.loading,
-  };
-};
+const mapStateToProps = (state) => ({
+  movies: state.movie.movies,
+  genres: state.genre.genres,
+  loggedIn: state.auth.loggedIn,
+  user: state.auth.user,
+  loading: state.movie.loading,
+});
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    getMovies: () => dispatch(getMovies()),
-    getGenres: () => dispatch(getGenres()),
-  };
-};
+const mapDispatchToProps = (dispatch) => ({
+  getMovies: () => dispatch(getMovies()),
+  getGenres: () => dispatch(getGenres()),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Movies);

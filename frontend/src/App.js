@@ -11,7 +11,7 @@ import AddMovieForm from "./pages/AddMovie";
 import AddGenre from "./pages/AddGenre";
 import UserDashboard from "./pages/UserDashboard";
 import Profile from "./pages/Profile";
-import Navbar from "./components/Navbar";
+import PillNav from "./components/PillNav";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { ToastContainer } from "./components/common";
@@ -32,17 +32,23 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Navbar />
+        <PillNav 
+          baseColor="#000000"
+          pillColor="#ffffff"
+          hoveredPillTextColor="#000000"
+          pillTextColor="#000000"
+          className="cinema-nav"
+        />
         <Switch>
-          <Route exact path="/movies/new" component={AddMovieForm} />
-          <Route exact path="/genres/new" component={AddGenre} />
+          <Route exact path="/addMovie" component={AddMovieForm} />
+          <Route exact path="/addGenre" component={AddGenre} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/profile" component={Profile} />
           <Route exact path="/dashboard" component={UserDashboard} />
           <Route path="/register" component={Register} />
-          <Route path="/movies" exact component={Movies} />
+          <Route path="/" exact component={Movies} />
 
-          <Redirect exact from="/" to="/movies" />
+          <Redirect exact from="/movies" to="/" />
         </Switch>
         <ToastContainer />
       </div>

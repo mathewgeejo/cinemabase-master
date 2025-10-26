@@ -1,104 +1,83 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import { signOut } from "../../actions/authAction";
-import "./style.css";
+import "./style_new.css";
 
-function Navbar(props) {
-  function toggleNav() {
-    animateSlider();
-    const burgerButton = document.getElementById("burger");
-    burgerButton.classList.toggle("is-active");
-  }
+class Navbar extends Component {
+  logout = () => {
+    this.props.signOut();
+  };
 
-  function animateSlider() {
-    const slider = document.getElementsByClassName("slider")[0];
-    document.getElementById("root").style.overflow = "hidden";
-    slider.classList.toggle("active");
+  render() {
+    const { loggedIn, user } = this.props;
 
-    const list = document.getElementsByClassName("list")[0];
-    list.childNodes.forEach((e, index) => {
-      if (e.style.animation) e.style.animation = "";
-      else
-        e.style.animation = `listItemFade 0.5s ease forwards ${
-          index / 5 + 0.3
-        }s`;
-    });
-  }
-
-  return (
-    <nav className="nav-wrapper">
-      <div id="burger" className="ico-btn" onClick={toggleNav}>
-        <span className="ico-btn__burger"></span>
-      </div>
-
-      {/* <Link className="nav-brand" to="/">iCinema</Link> */}
-
-      <div id="slider" className="slider">
-        <ul className="list">
-          <Link onClick={toggleNav} to="/movies">
-            Home
+    return (
+      <nav className="navbar">
+        <div className="navbar-container">
+          {/* Logo/Brand */}
+          <Link to="/" className="navbar-brand">
+            <span className="navbar-logo">◉</span>
+            <span className="navbar-title">CINEMABASE</span>
           </Link>
-          {!props.loggedIn ? (
-            <>
-              <Link onClick={toggleNav} to="/login">
-                Login
-              </Link>
 
-              <Link onClick={toggleNav} to="/register">
-                Register
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link onClick={toggleNav} to="/profile">
-                My Profile
-              </Link>
-              {props.user && props.user.role === "admin" && (
-                <>
-                  <Link onClick={toggleNav} to="/movies/new">
-                    Add Movie
+          {/* Navigation Links */}
+          <div className="navbar-nav">
+            <Link to="/movies" className="nav-link">
+              Movies
+            </Link>
+
+            {loggedIn ? (
+              <>
+                {user && user.role === "admin" && (
+                  <>
+                    <Link to="/movies/new" className="nav-link">
+                      Add Movie
+                    </Link>
+                    <Link to="/genres/new" className="nav-link">
+                      Add Genre
+                    </Link>
+                  </>
+                )}
+                
+                {user && user.role === "user" && (
+                  <Link to="/dashboard" className="nav-link">
+                    Dashboard
                   </Link>
-                  <Link onClick={toggleNav} to="/genres/new">
-                    Add Genre
-                  </Link>
-                </>
-              )}
-              {props.user && props.user.role === "user" && (
-                <>
-                  <Link onClick={toggleNav} to="/dashboard">
-                    My Dashboard
-                  </Link>
-                </>
-              )}
-              <Link
-                onClick={() => {
-                  toggleNav();
-                  props.signOut();
-                }}
-                to="/#"
-              >
-                Log out
-              </Link>
-            </>
-          )}
-        </ul>
-      </div>
-    </nav>
-  );
+                )}
+                
+                <Link to="/profile" className="nav-link">
+                  Profile
+                </Link>
+                
+                <button onClick={this.logout} className="nav-link nav-logout">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="nav-link">
+                  Login
+                </Link>
+                <Link to="/register" className="nav-link nav-cta">
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+    );
+  }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    loggedIn: state.auth.loggedIn,
-    user: state.auth.user,
-  };
-};
+const mapStateToProps = (state) => ({
+  loggedIn: state.auth.loggedIn,
+  user: state.auth.user,
+});
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    signOut: () => dispatch(signOut()),
-  };
-};
+const mapDispatchToProps = (dispatch) => ({
+  signOut: () => dispatch(signOut()),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navbar);
