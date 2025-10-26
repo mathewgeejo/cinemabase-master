@@ -1,6 +1,8 @@
 import * as cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
+import fs from 'fs';
+import path from 'path';
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -51,10 +53,25 @@ if (isCloudinaryConfigured) {
     }
   });
 } else {
-  console.log("Cloudinary not configured, using memory storage");
+  console.log("Cloudinary not configured, using local file storage");
   
-  // Use memory storage as fallback
-  const storage = multer.memoryStorage();
+  // Create uploads directory if it doesn't exist
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  
+  // Use local disk storage as fallback
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+      // Generate unique filename with original extension
+      const uniqueName = `movie_${Date.now()}_${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+      cb(null, uniqueName);
+    }
+  });
   
   upload = multer({ 
     storage,

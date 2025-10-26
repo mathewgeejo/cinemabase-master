@@ -113,11 +113,17 @@ router.post(
     
     if (req.file) {
       if (req.file.path) {
-        // Cloudinary upload successful
-        imagePath = req.file.path;
+        // Check if it's a Cloudinary path or local file path
+        if (req.file.path.includes('cloudinary')) {
+          // Cloudinary upload successful
+          imagePath = req.file.path;
+        } else {
+          // Local file storage - create URL path for frontend access
+          const filename = req.file.filename;
+          imagePath = `/uploads/${filename}`;
+        }
       } else if (req.file.buffer) {
-        // Memory storage (no Cloudinary) - use placeholder for now
-        // In a real app, you'd save this to local storage or another service
+        // Memory storage (fallback) - use placeholder
         imagePath = "https://via.placeholder.com/300x450?text=Uploaded+Image";
       }
     }

@@ -29,6 +29,9 @@ app.use("/api/genres", genre);
 app.use("/api/users", users);
 app.use("/api/auth", auth);
 
+// Serve uploaded images
+app.use("/uploads", express.static("uploads"));
+
 //Serve our static asset
 app.use(express.static("frontend/build"));
 
